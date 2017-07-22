@@ -1,0 +1,74 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(nnet)
+library(caret)
+
+#general parameters like dispaly options and variable seeds
+options(digits = 3)
+seed =1
+
+#loading the dataset
+data.seed<-read.csv("C:\\Users\\user\\Documents\\arpit.docs\\data analytics\\datasets\\deep learning\\MNIST\\train.csv")
+
+dim(data.seed)
+head(colnames(data.seed),4)
+tail(colnames(data.seed),4)
+head(data.seed[1:2, 1:4])
+head(data.seed)
+
+#preparing the training set
+data.seed$label<-factor(data.seed$label, levels = 0:9)
+i<-1:5000
+data.X<-data.seed[i, -1]
+data.Y<-data.seed[i, 1]
+dim(data.X)
+dim(data.Y)
+
+#training the model
+data.model<- train(x=data.X, y=data.Y, method = "nnet", tuneGrid = expand.grid(.size=c(5), .decay=0.1), trControl = trainControl(method = "none", seeds = seed), MaxNWts=10000, maxit=100)
+
+#predicting the images
+data.predt<- predict(data.model)
+
+#plotting the confusion matrix  
+caret::confusionMatrix(xtabs(~data.predt + data.Y))
+barplot(table(data.predt))
+
+#recovering 5 images we haven't use during training
+i<- 5001:5005
+new_data.X<-data.seed[i, -1]
+new_data.Y<-data.seed[i, 1]
+predict(data.model, newdata = new_data.X)
+new_data.Y
+#If we run both predict data and Y data then we see out of 5 how many values it is predicting correct
+
+#Extracting the probablity
+predict(data.model, newdata = new_data.X, type = "prob") #showing a matrix of a single digit with the how much % probablity in each row no.
+
+#Visulaizing the image
+vec<- new_data.X[3,]
+vec<-data.matrix(vec)
+img<-matrix(vec, ncol = 28)
+image(img[,28:1], col = grey(seq(0,1, length=256))) #As we shown in 5003, the digit is 3 and this predicted it 2
+
+
+```
+
+Author Arpit Gupta
+
+
+
+```{r, echo=TRUE}
+
+
+
+```
+
